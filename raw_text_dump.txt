@@ -1,0 +1,1319 @@
+Dual Attribute Adversarial Camouﬂage toward camouﬂaged object
+detection
+
+Yang Wang a, Zheng Fang a, Yun-fei Zheng a, b, Zhen Yang a, Wen Tong c, Tie-yong Cao a, *
+
+a Institute of Command and Control Engineering, Peoples Liberation Army Engineering University, Nanjing, 210007, China
+b The Army Artillery and Defense Academy of PLA, Nanjing, 210007, China
+c PLA University of Foreign Language, Luoyang, 471000, China
+
+a r t i c l e
+i n f o
+
+Article history:
+Received 29 August 2021
+Received in revised form
+25 October 2021
+Accepted 6 December 2021
+Available online 13 December 2021
+
+Keywords:
+Adversarial camouﬂage
+Digital camouﬂage generation
+Visual concealment
+Object detection
+Adversarial patch
+
+a b s t r a c t
+
+The object detectors can precisely detect the camouﬂaged object beyond human perception. The in-
+vestigations reveal that the CNNs-based (Convolution Neural Networks) detectors are vulnerable to
+adversarial attacks. Some works can fool detectors by crafting the adversarial camouﬂage attached to the
+object, leading to wrong prediction. It is hard for military operations to utilize the existing adversarial
+camouﬂage due to its conspicuous appearance. Motivated by this, this paper proposes the Dual Attribute
+Adversarial Camouﬂage (DAAC) for evading the detection by both detectors and humans. Generating
+DAAC includes two steps: (1) Extracting features from a speciﬁc type of scene to generate individual
+soldier digital camouﬂage; (2) Attaching the adversarial patch with scene features constraint to the
+individual soldier digital camouﬂage to generate the adversarial attribute of DAAC. The visual effects of
+the individual soldier digital camouﬂage and the adversarial patch will be improved after integrating
+with the scene features. Experiment results show that objects camouﬂaged by DAAC are well integrated
+with background and achieve visual concealment while remaining effective in fooling object detectors,
+thus evading the detections by both detectors and humans in the digital domain. This work can serve as
+the reference for crafting the adversarial camouﬂage in the physical world.
+© 2021 China Ordnance Society. Publishing services by Elsevier B.V. on behalf of KeAi Communications
+Co. Ltd. This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/
+licenses/by-nc-nd/4.0/).
+
+1. Introduction
+
+Camouﬂage plays an important role in many aspects, such as the
+concealment of soldiers and equipment. It can confuse the human
+vision system by blurring the distinction between object and
+background. In this way, the survival probability of camouﬂaged
+objects will increase in the military operation.
+In recent years, deep learning and convolution neural networks
+(CNNs) [1e4] have gained tremendous success in computer vision
+tasks. At the same time, they have propelled the development of
+camouﬂaged object detection in the modern military [5]. Current
+CNNs-based camouﬂaged object detectors [6,7] can precisely detect
+camouﬂaged objects beyond human detection. The camouﬂaged
+object detectors even replace human beings in some speciﬁc mili-
+tary operations (e.g., border patrol and satellite reconnaissance [8])
+
+due to their high accuracy and efﬁciency.
+However, some studies show that CNNs are vulnerable to
+adversarial attacks [9e11]. The precision of CNNs-based detectors
+will degrade signiﬁcantly confronting with adversarial attack. Thus,
+some attackers launch the adversarial attack by crafting the
+adversarial patch and attaching it into the image [12e16]. As
+demonstrated in Fig. 1, the utilization of most existing adversarial
+patches and camouﬂages is challenging due to their conspicuous
+appearance, especially in military operations.
+Duan et al. [14] propose a method that can improve the visual
+effects: Adversarial Camouﬂage. It transfers the natural style from
+the selected image to the adversarial camouﬂage. The Adversarial
+Camouﬂage has a good visual effect when the object is stationary,
+but it is not suitable for the moving object like soldier, because it is
+hard to select the suitable image style when matching the constant-
+changing backgrounds. In addition, Duan et al. cover the whole
+object with the adversarial camouﬂage, which is named the holistic
+patch (camouﬂage) in this paper. The same case also occurs in
+literature [15e17]. However, if the adversarial camouﬂage is shel-
+tered, its adversarial strength will degrade signiﬁcantly. Therefore,
+
+* Corresponding author.
+E-mail address: cty_ice@sina.com (T.-y. Cao).
+Peer review under responsibility of China Ordnance Society
+
+Contents lists available at ScienceDirect
+
+Defence Technology
+
+journal homepage: www.keaipublishing.com/en/journals/defence-technology
+
+https://doi.org/10.1016/j.dt.2021.12.003
+2214-9147/© 2021 China Ordnance Society. Publishing services by Elsevier B.V. on behalf of KeAi Communications Co. Ltd. This is an open access article under the CC BY-NC-
+ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+Defence Technology 22 (2023) 166e175
+
+the obstacles in practice would easily foil the protection of the
+holistic patch on soldiers.
+We expect to design an individual camouﬂage with the adver-
+sarial attribute that is adaptive to the military operations in the
+future. The visual concealment requires that the camouﬂage looks
+inconspicuous and can be applied as ordinary physical camouﬂage.
+The previous works mainly focus on attack strength and few of
+them care about the visual effects. Hence, we aim to generate the
+camouﬂage’s adversarial attribute while guaranteeing its visual
+effects.
+The usual digital camouﬂage generation methods utilize digital
+image processing techniques to extract scene features from the
+input image, including the dominant background color and texture
+structure [17e19], then craft the digital camouﬂage by arranging
+camouﬂage units ﬁlled with dominant colors according to the
+texture structure. However, there exist many differences between
+the generations of ordinary digital camouﬂage and individual
+soldier digital camouﬂage: (1) Extraction source. The ordinary
+camouﬂage utilizes the features extracted in the image, but the
+individual camouﬂage should use the features extracted from the
+scene to enhance the universality; (2) Noise in the image. The
+image contains many noises and interference areas, including
+natural noise (e.g., illumination and shadow) and area irrelevant to
+camouﬂage (e.g., sky). These noises and areas would degrade the
+accuracy of extraction. The differences above make the usual digital
+camouﬂage
+generation
+method
+unsuitable
+for
+individual
+camouﬂage.
+To address these issues, we proposed the Dual Attribute
+Adversarial Camouﬂage (DAAC) toward camouﬂaged object detec-
+tion. Generating DAAC includes two steps: (1) Extracting the scene
+features from one speciﬁc type of scene to craft the individual
+soldier digital camouﬂage; (2) Training the adversarial patch with
+scene features constraint and attaching it to the individual cam-
+ouﬂage to generate the adversarial attribute. The essential factor in
+achieving our target is the scene features. We design a new method
+to eliminate the noise in the image, and extract the scene features
+from the scene image set. Both the camouﬂage and patch merge
+with the scene context due to the scene features, which achieves
+the visual concealment. By attaching the adversarial patch with
+scene feature constraint to the speciﬁc position of digital camou-
+ﬂage, the generated DAAC can evade detection from both detectors
+and humans. The pipeline of the DAAC generation is shown in Fig. 2.
+We test and verify the performance of DAAC in 6 scenes. The
+mean precisions of Faster ReCNN [4] and YOLOv4 [20] are
+decreased by over 70%, meanwhile, the human detection time
+signiﬁcantly increases.
+The innovations of this paper are summarized as follows:
+
+(1) We introduce the DAAC, which can evade detections from
+both human and detectors. Since the appearance of DAAC is
+close to the ordinary digital camouﬂage, it can serve as the
+ordinary physical camouﬂage to confuse human vision.
+
+(2) We design a new method to ﬁlter the noise in the image and
+extract scene features from the scene image set effectively.
+The scene features are utilized to craft the individual soldier
+digital camouﬂage and constrain the adversarial patch,
+making the DAAC merge with scene context and realize vi-
+sual concealment.
+
+2. Related work
+
+2.1. Object detection
+
+The CNN-based detectors can be divided into one-stage de-
+tectors [21e23] and two-stage detectors [4,24,25] according to the
+ways of generating region proposals that might contain the object.
+Due to high accuracy and simplicity, Faster ReCNN [4] estab-
+lishes the prominent position of two-stage detectors. Faster ReCNN
+generates proposals through Region Proposal Network (RPN) in the
+ﬁrst stage. In the second stage, it reﬁnes the coordinates of pro-
+posals and outputs their category. The reﬁned proposals are called
+bounding boxes. The researchers present plenty of works to
+improve the Faster ReCNN in different aspects, e.g., the strategies of
+selecting training samples [26,27], multi-scale training [25,28,29],
+and architecture reform [24,30] In general, they have the same
+fundamental pipeline as Faster ReCNN.
+The one-stage methods directly generate the proposals in the
+feature maps extracted through the backbone. In this way, the
+computing time of the one-stage method signiﬁcantly decreases
+compared with the two-stage methods. The typical one-stage
+methods are the YOLO series [20,21,31,32]. YOLO divides the
+input image into many grids. For each grid, it predicts conﬁdence
+scores and bounding boxes, respectively. The conﬁdence scores are
+utilized to reﬂect the probability of object existence. Through data
+augmentation, multi-scale training, and efﬁcient backbone, the
+latest YOLO v4 [20] achieves state-of-the-art performance across a
+large-scale range of methods, including two-stage methods.
+
+2.2. Adversarial attacks
+
+Szegedy et al. [9] demonstrates that CNNs are vulnerable to the
+adversarial
+example.
+Some
+researchers
+attach
+imperceptible
+perturbation into images to lead the detectors predict incorrectly
+[33,34]. However, the complex environment (e.g., lighting, dis-
+tance) might impair the attack perturbation in practice [15].
+The adversarial patch intends to implement the universal and
+robust attacks to any image or object. Brown et al. [12] ﬁrstly
+introduce the adversarial patch toward image classiﬁcation. Liu
+et al. [13] craft the adversarial patch to jointly attack Faster ReCNN
+and YOLOv2. Huang et al. [35] reﬁne the patch that keeps the
+essential pixels for the attack. Some works make efforts to attack
+the detectors in the physical world. Chen et al. [36] propose to fool
+YOLO v2 in the trafﬁc scene. Xu et al. [37] print the adversarial
+patch on T-shirts to evade person detectors. Huang et al. [15] pro-
+pose the Universal Physical Camouﬂage Attack for fooling the de-
+tectors in both virtual scenes and the real world. Wang et al. [16]
+craft the adversarial camouﬂage by suppressing both the CNNs-
+based model and human attention. However, the works above
+mainly focus on attack strength and few of them care about the
+visual effects, making the existing adversarial camouﬂage methods
+not applicable to military practice. Different from the above works,
+we put the visual effects ﬁrst and propose the DAAC that prevents
+the object from being detected by detectors on the premise of vi-
+sual concealable.
+
+Fig. 1. Existing adversarial patches: (a) Literature [12]; (b) Literature [14]; (c) Cam-
+ouﬂages literature [15].
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+167
+
+2.3. Digital camouﬂage
+
+Literatures [17e19] extract dominant colors using the improved
+K-Means algorithm. The subsequent studies [38,39] combine K-
+Means with spectral clustering and histogram statistics to improve
+the extraction accuracy. Cai et al. [40] extracts the dominant colors
+by fuzzy C-Means and achieves expected results. Jia et al. [18] ar-
+ranges camouﬂage unit through Markov Random Field to generate
+Digital Camouﬂage. Li et al. [41] get the texture structure by the
+watershed algorithm. Literature [42,43] ﬁll units according to the
+proportion of colors in the background. In recent years, researchers
+have progressed in generating Digital Camouﬂage through CNN
+[44e46]. We consider the scene feature extraction as a statistical
+issue, and extract scene features from scene image set based on the
+local clustering and global sampling. The scene features are adop-
+ted to constrain the appearance of the adversarial patch and
+generate digital camouﬂage that is suitable for individual soldiers.
+
+3. Method
+
+We introduce the individual soldier digital camouﬂage in
+subsection 3.1 and the adversarial patch with scene feature
+constraint in subsection 3.2.
+
+3.1. Individual solider digital camouﬂage
+
+There are two main differences between the generations of or-
+dinary camouﬂage and the individual camouﬂage: the extraction
+source and the noise in the image, making the ordinary digital
+camouﬂage generation method unsuitable for the individual
+soldier digital camouﬂage.
+The individual soldier digital camouﬂage is supposed to adapt to
+all kinds of situations, which requires the camouﬂage to merge with
+the scene features to enhances the universality. To meet the
+requirement, we design a new method to extract the scene features
+from the scene image set and use it to generate the individual
+soldier camouﬂage. This section presents the individual solider
+digital camouﬂage generation from two aspects: the ﬁltration stage
+and the extraction stage. In the ﬁltration stage, considering the
+noise in the scene image will lower the extraction accuracy, we
+introduce the HLS histogram ﬁltering that can eliminate noise
+effectively in the image; In the extraction stage, we bring the
+method to extract the scene feature from the image set. In the end,
+we use the scene features to generate individual soldier digital
+camouﬂage and constrain the adversarial patch to improve their
+visual effects.
+
+3.1.1. The ﬁltration stage
+We divide the scene image into noise pixels and normal pixels.
+Noise pixels include natural noise (e.g., lighting, shadow, and other
+natural noise) and interfere with the extraction accuracy of the
+dominant color. The camouﬂaged object will not appear in the area
+irrelevant to camouﬂage, so the contained pixels are useless for
+extracting the scene feature. Our target is to ﬁlter these two kinds of
+noise pixels. In the RGB color space, it is difﬁcult to ﬁlter the noise
+pixels because three primary colors represent the same informa-
+tion (color) in essence.
+Thus, we convert the image into HLS color space. In HLS color
+space, it uses the indexes of hue, lightness, and saturation to
+represent the pixels. We analyze the distribution of pixels in the
+hue histogram and lightness histogram: (1) The hues of natural and
+normal pixels are distributed in the same interval but can easily be
+distinguished in lightness; (2) The pixels in the irrelevant area ac-
+count for a small proportion in the image, leading to a tiny bin in
+the hue histogram; The normal pixels take over a large proportion
+and present a continuous interval. It is easy to ﬁlter the noise pixels
+in hue and lightness histogram. The input image is shown in
+Fig. 3(a). The hue and lightness histogram are demonstrated in
+Fig. 3(b) and (c).
+Comparing subﬁgure (b) with (c), we ﬁnd that the general
+shapes of the red, green, and blue curves are similar with each other
+while the curves of hue, lightness look totally different. The hue and
+lightness ﬁltration results are shown in Fig. 3(d)e(e), where their
+statistic has been normalized. To obtain the continuous interval
+mentioned above, the maximum in the interval should be higher
+than the peak threshold to ensure that the interval contains the
+local maximum in the histogram, and the continuous tiny bins are
+
+Fig. 2. The pipeline of Dual Attribute Adversarial Camouﬂage (DAAC) generation.
+
+Fig. 3. The ﬁltration results: (a)Input image; (b)Histogram in RGB color; (c) Histogram
+in HLS color; (d)Result of lightness ﬁltration; (e) Result of hue ﬁltration.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+168
+
+ﬁltered out. After ﬁltration, we obtain many qualiﬁed intervals and
+only retain the interval with the minimum average value due to
+human sensitivity to lightness. The trough and peak threshold of
+lightness and hue LightnessT, LightnessP, HueT, HueP, are set 0.05,
+0.2, 0.5 and 0.9 by experiment. The result is shown in Fig. 4.
+As shown in Fig. 4(a), the image contains illumination pixels
+(mainly on the ground) and some irrelevant pixels (mainly in the
+sky). Fig. 4(b) tells that through hue ﬁltration, we move the most of
+irrelevant pixels. As shown in Fig. 4(c), the illumination pixels are
+removed by lightness ﬁltering. We save the ﬁltration result in the
+mask Maskf. In Maskf, the normal pixels remain unchanged, and
+noise pixels save to 0. After ﬁltration, most noise pixels are deleted,
+as shown in Fig. 4(d).
+
+3.1.2. The extraction stage
+We conduct the scene feature extraction from a statistical
+perspective. The overview of extraction is shown in Fig. 5. Through
+local clustering, we obtain the clustering groups in each image.
+Local clustering can preserve more features in the image than
+global clustering and reduce the computational cost. For all the
+clustering groups in the image set, we sample a constant number of
+clustering centers over each image. The clustering centers in global
+sampling are labeled with red in Fig. 5. Finally, the dominant colors
+are gained by clustering these red points through the K-Meansþþ
+algorithm. The ratio of clustering samples in K-Meansþþ clustering
+groups is seen as the proportion of the dominant color in the
+camouﬂage pattern. In this way, we address the issue that the
+features cannot be extracted from the whole scene images set
+effectively. The broader the sampling domain is, the higher the
+accuracy of feature extraction would be.
+Considering computation complexity and efﬁciency, we apply
+Simple Linear Iterative Clustering (SLIC) to clustering the image
+locally. SLIC represents the pixel through 5 variables: lightness l,
+color a, color b, coordinate x and y. We set k clustering centers
+evenly distributed in the image containing N pixels. The area of
+interest is in a rectangle with border length of 2 
+ﬃﬃﬃﬃﬃﬃﬃﬃ
+N=k
+p
+. The
+spatial distance ds and the color distance dc between the pixel and
+clustering center are calculated by Eqs. (1) and (2), respectively. The
+clustering center is updated according to dc and ds afterward.
+
+ds ¼
+
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+xj  xi
+2 þ
+
+yj  yi
+2
+r
+
+(1)
+
+dc ¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+lj  li
+2 þ aj  ai
+2 þ bj  bi
+2
+q
+(2)
+
+We sample M points from the image clustered and select S
+clustering centers nearest to each sampling point as the clustering
+samples in the next stage of K-Means clustering. It requires that the
+values of M*S points in Maskf are non-zero. Namely, they have not
+been eliminated in the ﬁltration stage. If this requirement is not
+satisﬁed, then we resample the points. We utilize K-Meansþþ to
+cluster all the sampled points and determine the number of cluster
+centers through Within Groups Sum of Squares. In the end, we
+select the four colors with the most clustering samples as the
+dominant colors to craft the camouﬂage pattern. In our experiment,
+M and S are set to 20 and 5, respectively.
+It is hard to extract the universal texture structure for the whole
+scene. Motivated by literature [44], we generate camouﬂage texture
+with the preset pattern, where the probabilities of different pat-
+terns are set beforehand. The preset pattern is randomly sampled
+and forms the texture. We ﬁll the texture according to the pro-
+portion of the dominant colors. The pipeline is shown in Fig. 6.
+The size of the preset pattern is 12  12 pixels. The individual
+soldier digital camouﬂage patterns generated in different scenes
+are shown below. Within each subﬁgure in Fig. 7, the left three
+images correspond to the scene, and the rightmost one is the
+camouﬂage pattern of the scene.
+
+3.2. Adversarial patch with the color constraint
+
+The previous works directly attach the conspicuous adversarial
+patch to the image, as shown in Fig. 1. To improve the visual effects,
+we propose to train the adversarial patch with the scene feature
+constraint. In this way, the adversarial patch can integrate into the
+digital camouﬂage more naturally. Then we embed the adversarial
+patch at the center of the object to fool the detectors. The center
+position has a signiﬁcant inﬂuence on the regression and classiﬁ-
+cation of the proposal. In this paper, we set two detectors as the
+targets, i.e., Faster ReCNN and YOLO v4 in literature [16]. The
+adversarial strength may degrade and even disappear if the de-
+tectors cannot photograph the adversarial patch embedded at the
+object's center, and we will discuss this issue in Section 6.
+We give a uniﬁed deﬁnition of proposals generated by two
+different detectors: for image x, its proposals present as P ¼
+fpi : ðdi; ciÞ; i ¼ 1; 2; …; ng. di denotes the location of pi, and ci
+denotes the conﬁdence score of pi that reﬂects whether the pi
+contains objects. Our target is to evade the detection from these
+two detectors by embedding the adversarial patch 4 on the object.
+The adversarial loss lossadv is described by Eq. (4):
+
+xadv ¼ embedðx; 4Þ
+(3)
+
+lossadv ¼ ExadvS;piPyiMSEðci; 0Þ
+(4)
+
+yi denotes the label of pi, which equals 1 if pi does not contain
+the object; otherwise, it equals 0. S denotes the scene. Meanwhile, 4
+is supposed to resemble the corresponding individual camouﬂage.
+We use the dominant color extracted to constrain 4.
+
+losscolor ¼ ExadvS
+X
+
+ch2R;G;B
+SmoothL1
+4s
+ch; ms
+ch
+
+(5)
+
+4 is constrained in R, G and B channels. m denotes the color with
+the most signiﬁcant proportion extracted in scene s. We embed 4 at
+the center of the object and formulate optimization objectives as:
+
+argminExadvSðlossadv þ losscolorÞ
+(6)
+Fig. 4. The results of ﬁltration: (a) Original image; (b) Result of hue ﬁltration; (c) Result
+of lightness ﬁltration; (d) Result of ﬁltration.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+169
+
+The illustration of the adversarial patch training and embedding
+is shown in Fig. 8. We ﬁnd that it could hold the trade-off between
+adversarial strength and visual concealment when using the same
+coefﬁcient to two kinds of losses, so we set their coefﬁcients to 1.
+Due to the moving position, the size of the object in the image
+keeps changing. The size should adapt to the object during training
+
+and testing, and we utilize the following formula to gain the scaling
+factor and resize the patch:
+
+Scale ¼ 6  QHS
+6
+(7)
+
+The original border length of the patch is set to 12, H denotes the
+object height.
+
+4. Experiment results and analysis
+
+We evaluate the DAAC from 3 aspects: human visual inspection,
+precision degradation of detectors, and computation efﬁciency. The
+experimental settings are as follows:
+Dataset: We experiment on an individual soldier dataset con-
+taining 6 different scenes, 2484 images with a resolution of 854 *
+480. The object in the image is labeled with a bounding box and
+
+Fig. 5. The overview of color extraction.
+
+Fig. 6. The individual solider digital camouﬂage.
+
+Fig. 7. The scene images and corresponding individual solider digital camouﬂage patterns: (a) Normal forest; (b) Autumn forest; (c) Broad-leaved forest; (d) Hardwood forest; (e)
+Summer forest; (e) Rain forest.
+
+Fig. 8. The illustration of the adversarial patch training and embedding.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+170
+
+mask. The function of the mask is to attach the DAAC to the object.
+More details of the dataset are shown in Table 1.
+The Adversarial Patch Training: Target models include Faster
+ReCNN [4] and YOLO v4 [20]. We adopt the ofﬁcial implementation
+of YOLO v4 and utilize the ResNet50 [1] as the backbone of Faster
+ReCNN with FPN [25]. The precision of Faster ReCNN is higher than
+the results given in Ref. [4].
+
+4.1. Visual inspection
+
+There are two evaluation ways: (1) Utilize canny operator to
+extract the edge of the camouﬂaged object. (2) Invite people to
+conduct the subjective evaluation. The edge extracted by the canny
+operator is shown in Fig. 9, and the objects are bounded by red
+rectangles. The upper threshold of canny operator is selected by
+OSTU [47], and the lower threshold is set to 1/3 of the upper
+threshold based on experience.
+Compared with Fig. 9(a) and (c), we can see that the object
+camouﬂaged with DAAC is highly similar with the background and
+able to achieve concealment, and it is not easy to ﬁnd the object
+with human vision quickly. The results of edge extraction in
+Fig. 9(b) and (d) show that the edge of the object camouﬂaged with
+DAAC is disguised, and the camouﬂaged object and background can
+merge well.
+We compare the visual effects between the patch with color
+constraint and the one without it. The scenes need not to be
+distinguished when training the patch without constraint. It means
+that the patch without constraint can be applied to any scenes. Two
+types of adversarial patches are shown in Fig. 10.
+As shown in the middle and right column of Fig.10, there is little
+difference between two types of the patch when it is small; the
+patch without constraint is easier to be found when the object is
+large, e.g., right column. The constrained one is closer to the digital
+camouﬂage pattern in appearance.
+We invite 15 persons who have not seen the dataset before the
+test. The test set used for subjective evaluation includes 100 images
+randomly selected from the dataset, and half of them is camou-
+ﬂaged by the DAAC. We count the number of false detections and
+the average detection time of the image. All testers know that the
+image contains only one object, and we deﬁne the case where the
+Intersection over Union (IoU) between the box bounded by the
+tester and the ground truth is less than 0.5 as the false detection.
+The average detection time of the image refers to the average time
+that the tester bound the box on each test image. The results are
+shown in Fig. 11.
+The x-axis coordinate is the number of the tester. As shown in
+Fig.11, the statistics of DAAC are signiﬁcantly higher than that of the
+original image. The average time to detect DAAC increases by 81.7%
+compared to detecting the original image, as shown in Fig. 11(a).
+Moreover, the number of false detections generally exceeds that of
+original images, as shown in Fig. 11(b). We also conduct the sub-
+jective evaluation of the object camouﬂaged with the individual
+camouﬂage and the unconstrained patch, and its statistics are
+lower than the originals. Two experiment results have veriﬁed the
+performance of DAAC on human visual detection.
+
+4.2. Precision degradation
+
+We use the individual soldier dataset and the dataset camou-
+ﬂaged by the digital camouﬂage to train the target model. The
+Adversarial patch is trained with the SGD optimizer over Nvidia
+2080Ti with a total of 8 images per minibatch (4 images per de-
+tectors) in a total of 20 epochs. The initial learning rate is set to 0.02
+and decreased by 10% in the 10th epoch. When embedding the
+adversarial patch to the object, we resize the pattern referring to
+Eq. (7). We measure the precision in the following cases: the
+original object, the object camouﬂaged by the individual soldier
+
+Table 1
+Number of images in different scenes.
+
+Scenes
+Normal
+Autumn
+Hardwood
+Summer
+Rain
+Broad-leaved
+Total
+
+Train set
+251
+708
+63
+715
+125
+375
+2237
+Val set
+19
+82
+10
+67
+20
+49
+247
+Total
+270
+790
+73
+782
+145
+424
+2484
+
+Fig. 9. The result of edge extraction: (a)Original image; (b) Edge extracted; (c) DAAC;
+(d) Edge extracted.
+
+Fig. 10. Comparison between patch with and without constraint: (a) Without
+constraint; (b) With constraint.
+
+Fig. 11. The results of subjective evaluation: (a) Average detection time; (b) Number of
+false detections.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+171
+
+digital camouﬂage, the object embedded with the adversarial
+patch, and the object camouﬂaged by DAAC. The precisions in the
+different scenes are presented in Tables 2 and 3.
+The detectors have a good performance on both the original
+dataset and the dataset with the digital camouﬂage. There is a
+narrow gap between them. After embedding the adversarial patch
+on the object, the mAP decreases by 73.2% and 71.2% on Faster
+ReCNN and YOLO v4, respectively. Furthermore, it decreases by
+78.0% and 79.2% through the DAAC on Faster ReCNN and YOLO v4,
+respectively. With DAAC, the mAP goes down to 11.3% and 12.8%,
+respectively, which reﬂects its attack strength.
+We also compare the precision between the patch with the
+constraint and the one without it, and the result in Table 4 tells that
+the mAP of these two kinds of patches are nearly the same. Namely,
+whether it has the constraint or not, the patch could attack the
+detectors with high strength.
+From the results, it seems that DAAC has good performance in
+misleading the detectors. The detection results are shown in Fig.12.
+
+4.3. Computation efﬁciency
+
+We analyze the computation efﬁciency of individual soldier
+digital camouﬂage in DAAC. Because its computing time ﬂuctuates
+wildly, the longest computing time is more than 20 times than the
+shortest one.
+The step to generate the digital camouﬂage include histogram
+ﬁltration, SLIC local-clustering, global sampling, K-Meansþþ clus-
+tering, and dominant color ﬁlling. We can ignore the times of global
+sampling, K-Meansþþ clustering, and dominant color ﬁlling
+because they would not change since sampling points are constant.
+The time of SLIC local-clustering and histogram ﬁltration is
+linear with the number of image pixels. Therefore, we mainly
+analyze the impact of different image resolutions. The normal for-
+est scene dataset is used for test, which contains 270 pictures. (see
+Table 5)
+With different resolutions, processing time increases from
+16 min to 55 s (K ¼ 400, scale ¼ 1/4) to over 9 h (K ¼ 100, scale ¼ 1).
+The complexity of SLIC is independent of K, but the choice of K
+affects the visual effects of individual camouﬂage. If K is too small,
+clustering centers will be repeatedly sampled, and too many image
+details will be lost; If K is too large, the proportion of sampling
+points in clustering centers is too small, leading to that the sam-
+pling operation cannot fully extract the image information. to hold
+the trade-off between computation speed and visual effects, we set
+K ¼ 300 and resolution scale ¼ 1/4, which makes the individual
+soldier digital camouﬂage achieve an expected result (Table 5).
+
+5. Prospect
+
+Existing adversarial camouﬂage methods mainly focus on static
+image
+tasks
+like
+image
+classiﬁcation
+and
+object
+detection
+[9,12,13,34,35]. A few works validate their high-level adversarial
+performance in the physical world with some ideal assumptions
+[11,14,15,28]. These works do not suit military practice due to the
+conspicuous appearance, as we mentioned previously. In addition,
+we still need to consider some practical factors in the physical
+
+application, which leaves a long way to apply the adversarial
+camouﬂage in reality. The following introduces the difﬁculties and
+some works we could refer to in implementing physical adversarial
+camouﬂage.
+
+5.1. The adversarial examples for non-rigid object
+
+Some researchers craft the adversarial example to a trafﬁc sign
+and automobile [16,28], and these rigid objects do not involve the
+problem that adversarial example deforms due to the pose change.
+Subsequent adversarial example designed for non-rigid objects
+(adversarial camouﬂage) encounters the problem. It is particularly
+prominent in the adversarial camouﬂage crafted for the person. A
+subtle pose change would cause obvious deformation of the
+adversarial camouﬂage on people and the degradation of adver-
+sarial performance, making it challenging to apply the adversarial
+camouﬂage in the physical world. Some works simulate the phys-
+ical world in a virtual environment [15,16]. However, it cannot
+simulate well the non-rigid deformation of the adversarial cam-
+ouﬂage, such as internal folding and distortion.
+Previous works provide some references. Athalye et al. [11]
+present the Expectation over Transformation (EoT) framework for
+synthesizing adversarial examples over a chosen distribution of
+transformations toward image classiﬁcation. The transformations
+include scaling, brightness, the addition of noise, random rotation,
+and translation that may occur in the physical world. They also
+validate its performance by using the 3D-printing in manufacturing
+the rigid model camouﬂaged with adversarial examples in practice.
+Xu et al. [37] adopt the EoT on the non-rigid object through the
+Thin Plate Spline (TPS) to model the possible deformation. TPS has
+been widely used to model the non-rigid transformation in image
+alignment
+and
+shape
+matching.
+For
+pixel
+
+bpðxÞ
+i
+¼ fb4ðxÞ
+i
+; b4ðxÞ
+i
+; i ¼ 1…ng in the image x, TPS provides a para-
+metric model of pixel displacement to estimate the increment
+
+DðpðxÞ; qÞ when mapping pð4;4Þ
+x
+to the deformation image z.
+(see Fig. 13)
+
+D
+
+ 
+
+pðxÞ; q
+
+!
+
+¼ a0 þ a14ðxÞ þ a24ðxÞ þ
+X
+n
+
+i¼1
+ciU
+bpðxÞ
+i
+ pðxÞ
+2
+
+
+(8)
+
+4ðzÞ ¼ 4ðxÞ þ D4
+(9)
+
+4ðzÞ ¼ 4ðxÞ þ D4
+(10)
+
+U
+denotes Radial Basis Function and q ¼ ½c; a are the TPS
+parameters.
+The authors intelligently conduct the TPS transformation on the
+T-shirt distributed by anchor points between two frames in video
+(Fig. 13). In this way, they work out the parameters of TPS and craft
+the adversarial T-shirt that could evade person detectors, which
+gives us the helpful hint. The modeling of the TPS is shown below.
+
+Table 2
+The mAP on scenes with Faster ReCNN (%).
+
+Scenes
+Normal
+Autumn
+Hardwood
+Summer
+Rain
+Broad-leaved
+Total
+
+Original
+93.8
+91.1
+82.0
+81.6
+94.1
+93.4
+89.3
+Digital Camouﬂage
+86.4
+87.2
+87.5
+76.5
+85.0
+93.6
+86.0
+Adversarial Patch
+12.1
+14.3
+17.4
+21.0
+8.4
+23.3
+16.1
+DAAC
+8.5
+15.6
+13.3
+10.4
+11.5
+8.7
+11.3
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+172
+
+5.2. The black-box attack
+
+The adversarial attack methods can be divided into white-box
+attack and black-box attack. The attacker cannot gain any param-
+eters or structure of the target model in black-box attack, which is
+opposite of white-box attack and close to the real scenario.
+Depending on whether the attacker needs to query the model,
+black-box attacks are labeled as query-based or query-free attacks.
+The query-free attacks attack the model relying on the trans-
+ferability that the adversarial example crafted under the known
+model parameters has adversarial strength to other unfamiliar
+models. It also can enhance the adversarial strength through the
+model-ensemble.
+Transferability
+and
+model-ensemble
+based
+methods are now in the common use of adversarial examples
+against detectors. On the other side, since the query-free method is
+less practical in military practice, we do not discuss them here.
+In transferability-based attacks, the attacker usually crafts the
+adversarial example for the universal module of detectors, e.g., RPN
+
+in two-stage detectors [15,28]. The crafted adversarial example has
+adversarial strength to the detector with the same module. Some
+works try to attack the classiﬁcation branch in one-stage detectors
+and RPN simultaneously [13,16,34,37], and the same with our
+method. To enhance the transferability, Wei et al. [34] manipulate
+the feature maps extracted by the backbone, which is usually uni-
+versal between detectors. They also use the attention weight to
+measure the objects and attach the perturbation to feature maps
+through GAN. Their work provides a reference for us to enhance the
+physical transferability of DAAC.
+
+5.3. Adversarial attacks toward visual object tracking
+
+For the object detector, detecting the object in the video is
+equivalent to detecting the frame at a speciﬁc time. There is no
+temporal coherence between the current and historical frames in
+object detection, so the attacker does not need to consider the in-
+ﬂuence of historical detection on the adversarial attack. However, it
+
+Table 3
+The mAP on scenes with YOLO v4 (%).
+
+Scenes
+Normal
+Autumn
+Hardwood
+Summer
+Rain
+Broad-leaved
+Total
+
+Original
+95.0
+84.1
+87.5
+95.5
+94.1
+95.7
+92.0
+Digital Camouﬂage
+85.7
+79.1
+88.9
+92.3
+94.7
+91.8
+88.8
+Adversarial Patch
+14.3
+11.3
+22.2
+28.1
+24.1
+25.0
+20.8
+DAAC
+9.1
+9.1
+15.4
+13.2
+17.4
+12.7
+12.8
+
+Table 4
+The mAP of the unconstrained patch and the constrained patch (%).
+
+Scenes
+Normal
+Autumn
+Hardwood
+Summer
+Rain
+Broad-leaved
+Total
+
+Faster ReCNN
+6.0/8.5
+8.8/15.6
+9.3/13.3
+9.6/10.4
+7.4/11.5
+8.5/8.7
+8.3/11.3
+YOLO v4
+8.3/9.1
+10.3/9.1
+12.5/15.4
+8.2/13.2
+7.7/17.4
+12.3/12.7
+9.9/12.8
+
+Fig. 12. The detection results: (a) The ground truth; (b) The detections of YOLO v4; (c)
+The detections of Faster ReCNN.
+
+Table 5
+Processing time of SLIC local-clustering and histogram ﬁltering (s).
+
+Resolution
+Clustering centers
+Clustering time
+Histogram time
+Processing time
+
+Scale ¼ 1/4
+100
+3.54
+0.23
+3.77
+200
+3.45
+0.23
+3.68
+300
+3.40
+0.23
+3.63
+400
+3.39
+0.23
+3.62
+Scale ¼ 1/2
+100
+15.91
+0.94
+16.85
+200
+14.87
+0.91
+15.78
+300
+14.55
+0.89
+15.44
+400
+14.46
+0.92
+15.38
+Scale ¼ 1
+100
+119.50
+3.94
+123.44
+200
+85.50
+3.72
+89.22
+300
+73.98
+3.11
+77.09
+400
+69.91
+3.52
+73.40
+
+Fig. 13. The modeling of the TPS.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+173
+
+is not the same with visual object tracking (VOT).
+VOT is a fundamental task in computer vison. Given the initial
+state of a target in the ﬁrst frame of a video sequence, the aim of
+VOT is to automatically obtain the states of the object in the sub-
+sequent video frames. While locating the object, the tracker would
+produce temporally coherent results, like bounding boxes, and
+make the potential area of current result close to that of last result.
+It is more challenging to craft adversarial examples to VOT due to
+the temporally coherent frames.
+Compared with image classiﬁcation and object detection tasks,
+there are fewer adversarial attack methods targeting on VOT, and
+most of them are white-box attacks. Jia et al. [48] consider the
+temporal consistency between subsequent frames and use the
+current adversarial perturbation to initialize the perturbation in the
+next frame. In addition, they attempt to attack the regression
+branch that reﬁnes the bounding box. Guo et al. [49] combine the
+temporal attack with spatial-aware gradient sign method and
+propose the spatial-temporal sparse incremental attack that can
+generate perturbations in real-time. Liang et al. [50] present the
+Fast Attack Network that combines drift loss and embedded feature
+loss to construct an adversarial attack. Chen et al. [51] design a one-
+shot adversarial attack method with dual attention by optimizing
+the batch conﬁdence loss with conﬁdence attention and the feature
+loss with channel attention. Jia et al. [52] propose the black-box IoU
+attack that sequentially generates perturbations based on the IoU
+scores from the current and historical frames.
+It is hard to know the parameters of the tracker deployed in the
+background in the real world, so the black-box attacks are more
+practical than the white-box attacks. We will consider incorpo-
+rating the temporal attack with DAAC and make it adversarial to
+object tracker.
+
+6. Subsequent technology research
+
+We will focus on two problems in the subsequent research to
+apply the DAAC in the physical world. The ﬁrst problem is the
+deformation of the adversarial camouﬂage in the non-rigid object,
+which we have discussed in subsection 5.1. The second problem is
+the previously mentioned patch-holistic.
+Currently, we attach the adversarial patch with scene feature
+constraint to the object’s center. If the patch is sheltered, the
+
+adversarial strength will deteriorate signiﬁcantly, the same as the
+patch-holistic in literature [14]. In order to address the issue of
+patch-holistic, we propose the solution as demonstrated in
+Fig. 14(b). We transform the adversarial patch with scene feature
+constraint (Resize& Rotate) according to the distance and deviation
+angle between the detector and camouﬂaged object. Afterward, we
+attach the transformed patch evenly to the entire digital camou-
+ﬂage. The part of the detected camouﬂaged object might contain
+the adversarial patch. With this practice, the adversarial attack is
+more likely to maintain a high-level strength even if the object
+camouﬂaged with DAAC is sheltered.
+However, since it is hard to measure the detection probability of
+the adversarial patch in the camouﬂage, we only discuss the situ-
+ation of attaching the adversarial patch on the center of object in
+the digital domain. It is a better choice to test in the physical world
+instead of in the digital domain, and we would facilitate further
+research on it.
+
+7. Conclusions
+
+After detailing the existing adversarial patch and camouﬂage
+research, this paper proposes the Dual Attribute Adversarial Cam-
+ouﬂage
+(DAAC)
+that
+can
+achieve
+visual
+concealment
+while
+remaining effective in fooling CNNs-based object detectors, thus
+evading the detections by both detectors and humans in the digital
+domain.
+To the best of our knowledge, this is the ﬁrst work that combines
+individual camouﬂage with the adversarial patch to craft the
+adversarial camouﬂage. We propose a new method to extract the
+scene features efﬁciently and intelligently utilize the feature to
+improve the visual effects of DAAC. In addition, we discuss the
+difﬁculties in the practical implementation of DAAC and the sub-
+sequent research and experiment as well. In the end, we hope our
+work can provide an informative reference to the generation of
+adversarial camouﬂage.
+
+Declaration of competing interest
+
+The authors declare that they have no known competing
+ﬁnancial interests or personal relationships that could have
+appeared to inﬂuence the work reported in this paper.
+
+Fig. 14. The Comparison of the original pipeline and the solution to the patch-holistic.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+174
+
+Acknowledgements
+
+The authors would like to acknowledge National Natural Science
+Foundation of China (grant number 61801512, grant number
+62071484) and Natural Science Foundation of Jiangsu Province
+(grant number BK20180080) to provide fund for conducting
+experiments.
+
+References
+
+[1] He K, Zhang X, Ren S, Sun J. Deep residual learning for image recognition. IEEE
+Comput Soc Conf Comput Vis Pattern Recogn 2016. https://doi.org/10.1109/
+CVPR.2016.90. 2016-Decem:770e8.
+[2] Huang G, Liu Z, Van Der Maaten L, Weinberger KQ. Densely connected con-
+volutional networks. Proc - 30th IEEE Conf Comput Vis Pattern Recognition,
+CVPR
+2017
+2017.
+https://doi.org/10.1109/CVPR.2017.243.
+2017-Janua:
+2261e9.
+[3] Shelhamer E, Long J, Darrell T. Fully convolutional networks for semantic
+segmentation. IEEE Trans Pattern Anal Mach Intell 2017;39:640e51. https://
+doi.org/10.1109/TPAMI.2016.2572683.
+[4] Ren S, He K, Girshick R, Sun J, Faster R-CNN. Towards real-time object
+detection with region proposal networks. IEEE Trans Pattern Anal Mach Intell
+2017;39:1137e49. https://doi.org/10.1109/TPAMI.2016.2577031.
+[5] Zheng Y, Zhang X, Wang F, Cao T, Sun M, Wang X. Detection of people with
+camouﬂage pattern via dense deconvolution network. IEEE Signal Process Lett
+2019;26:29e33. https://doi.org/10.1109/LSP.2018.2825959.
+[6] Fan DP, Ji GP, Sun G, Cheng MM, Shen J, Shao L. Camouﬂaged object detection.
+IEEE Comput Soc Conf Comput Vis Pattern Recogn 2020:2774e84. https://
+doi.org/10.1109/CVPR42600.2020.00285.
+[7] Le TN, Nguyen TV, Nie Z, Tran MT, Sugimoto A. Anabranch network for
+camouﬂaged object segmentation. Comput Vis Image Understand 2019;184:
+45e56. https://doi.org/10.1016/j.cviu.2019.04.006.
+[8] Luo Rong, Wang Liang, Xiao Yu-jie, He Yi, Zhao D. Application of deep learning
+technology in military Field. Commond Control Simul 2020;42:3288e97.
+https://doi.org/10.3969/j.issn.1673-3819.2020.01.001.
+[9] Szegedy C, Zaremba W, Sutskever I, Bruna J, Erhan D, Goodfellow I, et al.
+Intriguing properties of neural networks. 2nd Int Conf Learn Represent ICLR
+2014 - Conf Track Proc 2014;1e10.
+[10] Nguyen A, Yosinski J, Clune J. Deep neural networks are easily fooled: high
+conﬁdence predictions for unrecognizable images. IEEE Comput Soc Conf
+Comput
+Vis
+Pattern
+Recogn
+2015.
+https://doi.org/10.1109/
+CVPR.2015.7298640. 07-12-June:427e36.
+[11] Athalye A, Engstrom L, Ilyas A, Kevin K. Synthesizing robust adversarial ex-
+amples. 35th Int Conf Mach Learn ICML 2018 2018;1:449e68.
+[12] Brown TB, Mane D, Roy A, Abadi M, Gilmer J. Adversarial Patch 2017.
+[13] Liu X, Yang H, Liu Z, Song L, Li H, Chen Y. DPatch: an adversarial patch attack
+on object detectors. CEUR Workshop Proc 2019:2301.
+[14] Duan R, Ma X, Wang Y, Bailey J, Qin AK, Yang Y. Adversarial camouﬂage:
+hiding physical-world attacks with natural styles. IEEE Comput Soc Conf
+Comput
+Vis
+Pattern
+Recogn
+2020:997e1005.
+https://doi.org/10.1109/
+CVPR42600.2020.00108.
+[15] Huang L, Gao C, Zhou Y, Xie C, Yuille A, Zou C, et al. Universal physical cam-
+ouﬂage attacks on object detectors. IEEE Comput Soc Conf Comput Vis Pattern
+Recogn 2020:717e26. https://doi.org/10.1109/CVPR42600.2020.00080.
+[16] Wang J, Liu A, Yin Z, Liu S, Tang S, Liu X. Dual attention suppression attack:
+generate adversarial camouﬂage in physical world 2021.
+[17] Yu J, Shuang X. Design of imitation digital camouﬂage. J Appl Sci 2012;30:
+331e4. https://doi.org/10.3969/j.issn.0255-8297.2012.04.001.
+[18] Jia Q, Lv X, Wu C, Rong X. Application of Markov randoim Field and pyramid
+structure in the desin of digital pattern painting. J Appl Sci 2012;30:624e8.
+https://doi.org/10.3969/j.issn.0255-8297.2012.06.011.
+[19] Zhang Y, Wu W, Liu Z. Comouﬂage color selection based on improved K-
+means clustering, vol. 45; 2009. p. 210e2. https://doi.org/10.3778/j.issn.1002-
+8331.2009.06.060.
+[20] Bochkovskiy A, Wang C-Y, Liao H-YM. YOLOv4: optimal speed and accuracy of
+object detection 2020.
+[21] Redmon J, Divvala S, Girshick R, Farhadi A. You only look once: uniﬁed, real-
+time object detection. IEEE Comput Soc Conf Comput Vis Pattern Recogn 2016.
+https://doi.org/10.1109/CVPR.2016.91. 2016-Decem:779e88.
+[22] Liu W, Anguelov D, Erhan D, Szegedy C, Reed S, Fu CY, et al. SSD: single shot
+multibox detector. Lect notes comput sci (including subser lect notes artif
+intell lect notes bioinformatics), vol. 9905; 2016. https://doi.org/10.1007/978-
+3-319-46448-0_2. LNCS:21e37.
+[23] Lin TY, Goyal P, Girshick R, He K, Dollar P. Focal loss for dense object detection.
+IEEE Trans Pattern Anal Mach Intell 2020;42:318e27. https://doi.org/10.1109/
+TPAMI.2018.2858826.
+[24] Cai Z, Vasconcelos N. Cascade R-CNN: delving into high quality object
+detection. IEEE Comput Soc Conf Comput Vis Pattern Recogn 2018:6154e62.
+https://doi.org/10.1109/CVPR.2018.00644.
+
+[25] Lin T-Y, Dollar P, Girshick R, He K, Hariharan B, Belongie S. Feature pyramid
+networks for object detection. In: 2017 IEEE conf. Comput. Vis. Pattern rec-
+ognit.; 2017. p. 936e44. https://doi.org/10.1109/CVPR.2017.106.
+[26] Tan Z, Nie X, Qian Q, Li N, Li H. Learning to rank proposals for object detection.
+Proc
+IEEE
+Int
+Conf
+Comput
+Vis
+2019.
+https://doi.org/10.1109/
+ICCV.2019.00836. 2019-Octob:8272e80.
+[27] Pang J, Chen K, Shi J, Feng H, Ouyang W, Lin D, Libra R-CNN. Towards balanced
+learning for object detection. IEEE Comput Soc Conf Comput Vis Pattern
+Recogn 2019. https://doi.org/10.1109/CVPR.2019.00091. 2019-June:821e30.
+[28] Singh B, Najibi M, Davis LS. Sniper: efﬁcient multi-scale training. Adv Neural
+Inf Process Syst 2018. 2018-Decem:9310e20.
+[29] Singh B, Davis LS. An analysis of scale invariance in object detection - SNIP.
+IEEE Comput Soc Conf Comput Vis Pattern Recogn 2018:3578e87. https://
+doi.org/10.1109/CVPR.2018.00377.
+[30] Dai J, Li Y, He K, Sun JR-FCN. Object detection via region-based fully con-
+volutional networks. Adv Neural Inf Process Syst 2016:379e87.
+[31] Redmon J, Farhadi A. YOLO v.3. Tech Rep 2018;1e6.
+[32] Redmon J, Farhadi A. YOLO9000: better, faster, stronger. Proc - 30th IEEE Conf
+Comput Vis Pattern Recognition, CVPR 2017 2017. https://doi.org/10.1109/
+CVPR.2017.690. 2017-Janua:6517e25.
+[33] Xie C, Wang J, Zhang Z, Zhou Y, Xie L, Yuille A. Adversarial examples for se-
+mantic segmentation and object detection. Proc IEEE Int Conf Comput Vis
+2017. https://doi.org/10.1109/ICCV.2017.153. 2017-Octob:1378e87.
+[34] Wei X, Liang S, Chen N, Cao X. Transferable adversarial attacks for image and
+video object detection. IJCAI Int Jt Conf Artif Intell 2019. https://doi.org/
+10.24963/ijcai.2019/134. 2019-Augus:954e60.
+[35] Huang H, Wang Y, Chen Z, Tang Z, Zhang W, Ma K-K. Rpattack: reﬁned patch
+attack on general object detectors. 2021. p. 1e6. https://doi.org/10.1109/
+icme51207.2021.9428443.
+[36] Chen ST, Cornelius C, Martin J, Chau DHP. ShapeShifter: robust physical
+adversarial attack on faster R-CNN object detector. Lect Notes Comput Sci
+2019;11051. https://doi.org/10.1007/978-3-030-10925-7_4. LNAI:52e68.
+[37] Xu K, Zhang G, Liu S, Fan Q, Sun M, Chen H, et al. Adversarial T-shirt! Evading
+person detectors in a physical world.
+Lect Notes Comput Sci 2020;12350.
+https://doi.org/10.1007/978-3-030-58558-7_39. LNCS:665e81.
+[38] Liu, Wang Zunyang, Wang Zirong, Jicheng Sun X. Design method of imitated
+pattern painting based on main color clustering. Laser & Nfrared 2009;39:
+793e6.
+[39] Xu Y. Camouglage color selection based on dominant color extraction. Opto-
+Electronic Eng 2007;34:100e4.
+[40] Cai Y, Xue S, Zhou Z, Huang Y. Study of digital pattern genration method based
+on fractal Brown model. Acta Armamentarii 2016;37:186e92. https://doi.org/
+10.3969/j.issn.1000-1093.2016.01.026.
+[41] Li Y, Zhang Y, Xing R, Chen Y, Yang L, Hao Y. Applicaiton of fusion technology
+in camouﬂage texture generation. Ordnance Ind Autom 2021;40:85e8.
+https://doi.org/10.7690/bgzdh.2021.04.018.
+[42] Yu J, Yang W, Hu Z, Chen H. Research of digital camouﬂage generation algo-
+rithm.
+Opto-Electronic
+Eng
+2010;37:110e4.
+https://doi.org/10.3969/
+j,issn.1003-501X.2010.11.020.
+[43] Xue F, Xu S, Luo YT, Jia W. Design of digital camouﬂage by recursive over-
+lapping of pattern templates. Neurocomputing 2016;172:262e70. https://
+doi.org/10.1016/j.neucom.2014.12.108.
+[44] Yang X, Xu W dong, Jia Q, Li L, Zhu W nian, Tian J yao, et al. Research on
+extraction and reproduction of deformation camouﬂage spot based on
+generative adversarial network model. Def Technol 2020;16:555e63. https://
+doi.org/10.1016/j.dt.2019.06.021.
+[45] Yang X, Xu WD, Jia Q, Li L. Research on digital camouﬂage pattern generation
+algorithm based on adversarial autoencoder network. Int J Pattern Recogn
+Artif Intell 2020;34:1e15. https://doi.org/10.1142/S0218001420500172.
+[46] Wei X, Li G, Wang K. A novel method for automatic camouﬂage pattern
+synthesize.
+IEEE
+Access
+2021;9:67559e68.
+https://doi.org/10.1109/
+ACCESS.2021.3077258.
+[47] Otsu N. A threshold selection method from gray-level histograms. IEEE Trans
+Syst Man Cybern 1979;9:62e6. https://doi.org/10.1109/TSMC.1979.4310076.
+[48] Jia S, Ma C, Song Y, Yang X. Robust tracking against adversarial attacks. Lect
+notes comput sci (including subser lect notes artif intell lect notes bioinfor-
+matics),
+vol.
+12364;
+2020.
+https://doi.org/10.1007/978-3-030-58529-7_5.
+LNCS:69e84.
+[49] Guo Q, Xie X, Juefei-Xu F, Ma L, Li Z, Xue W, et al. SPARK: spatial-aware online
+incremental attack against visual tracking. Lect Notes Comput Sci 2020;12370.
+https://doi.org/10.1007/978-3-030-58595-2_13. LNCS:202e19.
+[50] Liang S, Wei X, Yao S, Cao X. Efﬁcient adversarial attacks for visual object
+tracking. Lect notes comput sci (including subser lect notes artif intell lect
+notes bioinformatics), vol. 12371; 2020. https://doi.org/10.1007/978-3-030-
+58574-7_3. LNCS:34e50.
+[51] Chen X, Yan X, Zheng F, Jiang Y, Xia ST, Zhao Y, et al. One-shot adversarial
+attacks on visual tracking with dual attention. IEEE Comput Soc Conf Comput
+Vis
+Pattern
+Recogn
+2020:10173e82.
+https://doi.org/10.1109/
+CVPR42600.2020.01019.
+[52] Jia S, Song Y, Ma C, Yang X. IoU attack: towards temporally coherent black-box
+Adversarial attack for visual object tracking 2021.
+
+Y. Wang, Z. Fang, Y.-f. Zheng et al.
+Defence Technology 22 (2023) 166e175
+
+175
+
